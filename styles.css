@@ -1,0 +1,446 @@
+/* ═══════════════════════════════════════════════════════════
+   AI TIMELINES — styles.css
+   ═══════════════════════════════════════════════════════════
+
+   TABLE OF CONTENTS
+   -----------------
+   1. CSS Variables & Reset
+   2. Grain Overlay
+   3. Header & Navigation
+   4. Sections (show/hide + transitions)
+   5. Hero
+   6. Section Divider
+   7. Timeline Layout
+   8. Year Marker
+   9. Event Card
+   10. Node (dot on spine)
+   11. Footer
+   12. Animations
+   13. Responsive / Mobile
+
+   ─────────────────────────────────────────────────────────
+   HOW TO ADD A NEW CATEGORY COLOR:
+   Add a new CSS variable --c-<id> in :root, then the
+   hero-bg gradient will be picked up automatically from
+   the data. The nav active state needs one new rule in
+   section 3. That's it.
+   ═══════════════════════════════════════════════════════════ */
+
+
+/* ── 1. CSS VARIABLES & RESET ── */
+:root {
+  /* Background & text */
+  --bg:     #07070f;
+  --bg2:    #0d0d1a;
+  --border: #1e1e35;
+  --muted:  #3d3d5c;
+  --text:   #b8b8d0;
+  --white:  #e8e8f0;
+
+  /* Category accent colors.
+     To add a new category, add --c-<id> here
+     and one .nav-btn[data-section="<id>"].active rule below. */
+  --c-main:     #7fffd4;
+  --c-image:    #ff9f43;
+  --c-language: #54a0ff;
+  --c-agents:   #ff6b9d;
+  --c-science:  #a29bfe;
+  --c-open:     #00d2d3;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  overflow-x: hidden;
+}
+
+
+/* ── 2. GRAIN OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+
+/* ── 3. HEADER & NAVIGATION ── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  background: rgba(7, 7, 15, 0.96);
+  backdrop-filter: blur(8px);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.28em;
+  color: var(--white);
+  flex-shrink: 0;
+  margin-right: 24px;
+}
+.brand em { color: var(--c-main); font-style: normal; }
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+nav::-webkit-scrollbar { display: none; }
+
+.nav-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.22s;
+  white-space: nowrap;
+}
+.nav-btn:hover {
+  color: var(--white);
+  border-color: var(--border);
+}
+.nav-btn.active {
+  color: var(--white);
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Active state per category.
+   To add a new category: copy one block and change the id + color. */
+.nav-btn[data-section="main"].active     { color: var(--c-main);     border-color: rgba(127,255,212,0.4); }
+.nav-btn[data-section="image"].active    { color: var(--c-image);    border-color: rgba(255,159, 67,0.4); }
+.nav-btn[data-section="language"].active { color: var(--c-language); border-color: rgba( 84,160,255,0.4); }
+.nav-btn[data-section="agents"].active   { color: var(--c-agents);   border-color: rgba(255,107,157,0.4); }
+.nav-btn[data-section="science"].active  { color: var(--c-science);  border-color: rgba(162,155,254,0.4); }
+.nav-btn[data-section="open"].active     { color: var(--c-open);     border-color: rgba(  0,210,211,0.4); }
+
+
+/* ── 4. SECTIONS ── */
+.section {
+  display: none;
+  opacity: 0;
+  min-height: 100vh;
+  padding-top: 60px;
+  transition: opacity 0.45s;
+}
+.section.active   { display: block; }
+.section.fade-in  { opacity: 1; }
+
+
+/* ── 5. HERO ── */
+.hero {
+  min-height: 42vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 56px 72px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Background gradient is injected inline by app.js
+     based on the category's rgbColor value. */
+}
+
+.hero-eyebrow {
+  font-size: 0.6rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  opacity: 0.65;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  line-height: 0.93;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  position: relative;
+  z-index: 2;
+}
+.hero-title .it {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+}
+
+.hero-desc {
+  margin-top: 18px;
+  font-size: 0.7rem;
+  line-height: 1.9;
+  max-width: 500px;
+  color: var(--muted);
+  position: relative;
+  z-index: 2;
+}
+
+.hero-count {
+  position: absolute;
+  bottom: 44px;
+  right: 72px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5.5rem;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--border);
+  user-select: none;
+  line-height: 1;
+}
+
+
+/* ── 6. SECTION DIVIDER ── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  margin: 0 40px;
+}
+
+
+/* ── 7. TIMELINE LAYOUT ── */
+.timeline-wrap {
+  position: relative;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 16px 40px 110px;
+}
+
+.tl-spine {
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, transparent, var(--muted) 6%, var(--muted) 94%, transparent);
+  opacity: 0.3;
+}
+
+
+/* ── 8. YEAR MARKER ── */
+.tl-year {
+  text-align: center;
+  padding: 44px 0 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s;
+  position: relative;
+  z-index: 2;
+}
+.tl-year.vis { opacity: 1; transform: none; }
+
+.tl-year-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--muted);
+  letter-spacing: 0.08em;
+  display: inline-block;
+  padding: 0 18px;
+  background: var(--bg);
+  position: relative;
+  z-index: 2;
+}
+
+
+/* ── 9. EVENT CARD ── */
+.tl-event {
+  display: grid;
+  grid-template-columns: 1fr 52px 1fr;
+  align-items: start;
+  margin-bottom: 54px;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.6s, transform 0.6s;
+}
+.tl-event.vis { opacity: 1; transform: none; }
+
+/* Left-aligned event */
+.tl-event.left .tl-card { grid-column: 1; text-align: right; padding-right: 28px; }
+.tl-event.left .tl-node { grid-column: 2; }
+.tl-event.left .tl-void { grid-column: 3; }
+
+/* Right-aligned event */
+.tl-event.right .tl-void { grid-column: 1; }
+.tl-event.right .tl-node { grid-column: 2; }
+.tl-event.right .tl-card { grid-column: 3; text-align: left; padding-left: 28px; }
+
+/* Milestone variant */
+.tl-event.milestone .card-title { text-shadow: 0 0 18px var(--accent, #fff); }
+.tl-event.milestone .node-ring  { box-shadow: 0 0 10px var(--accent, #fff); }
+
+.card-date {
+  font-size: 0.56rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  color: var(--white);
+  margin-bottom: 3px;
+  transition: color 0.25s;
+}
+.tl-event:hover .card-title { color: var(--accent, #fff); }
+
+.card-sub {
+  font-size: 0.58rem;
+  font-style: italic;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 9px;
+}
+
+.card-desc {
+  font-size: 0.66rem;
+  line-height: 1.85;
+  color: var(--text);
+  max-width: 290px;
+}
+.tl-event.left .card-desc { margin-left: auto; }
+
+.card-tag {
+  display: inline-block;
+  padding: 2px 9px;
+  font-size: 0.53rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 1px solid var(--accent, #fff);
+  color: var(--accent, #fff);
+  margin-top: 10px;
+  opacity: 0.5;
+  transition: opacity 0.25s;
+}
+.tl-event:hover .card-tag { opacity: 0.95; }
+
+
+/* ── 10. NODE (dot on spine) ── */
+.tl-node {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.node-ring {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent, #fff);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.node-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent, #fff);
+}
+.tl-event:hover .node-ring {
+  transform: scale(1.65);
+  box-shadow: 0 0 14px var(--accent, #fff);
+}
+
+/* Connector tick from node to card */
+.tl-event.left  .tl-node::after,
+.tl-event.right .tl-node::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  width: 18px;
+  height: 1px;
+  background: var(--accent, #fff);
+  opacity: 0.22;
+}
+.tl-event.left  .tl-node::after { right: 14px; }
+.tl-event.right .tl-node::after { left: 14px; }
+
+
+/* ── 11. FOOTER ── */
+footer {
+  text-align: center;
+  padding: 44px 40px;
+  font-size: 0.56rem;
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  text-transform: uppercase;
+  border-top: 1px solid var(--border);
+}
+
+
+/* ── 12. ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Hero text animates in when section becomes active */
+.section.fade-in .hero-eyebrow { animation: fadeUp 0.65s 0.10s both; }
+.section.fade-in .hero-title   { animation: fadeUp 0.65s 0.22s both; }
+.section.fade-in .hero-desc    { animation: fadeUp 0.65s 0.36s both; }
+
+
+/* ── 13. RESPONSIVE / MOBILE ── */
+@media (max-width: 660px) {
+  header { padding: 0 14px; }
+  .brand { font-size: 0.85rem; margin-right: 12px; }
+  .nav-btn { font-size: 0.48rem; padding: 4px 8px; letter-spacing: 0.1em; }
+
+  .hero { padding: 36px 22px 32px; min-height: 36vh; }
+  .hero-count { display: none; }
+
+  .timeline-wrap { padding: 12px 14px 70px; }
+
+  /* Collapse to single-column layout on mobile */
+  .tl-spine { left: 22px; transform: none; }
+
+  .tl-event { grid-template-columns: 42px 1fr !important; }
+  .tl-event .tl-node { grid-column: 1 !important; }
+  .tl-event .tl-card {
+    grid-column: 2 !important;
+    text-align: left !important;
+    padding-left: 16px !important;
+    padding-right: 0 !important;
+  }
+  .tl-event .tl-void { display: none !important; }
+  .tl-event.left .card-desc { margin-left: 0; }
+  .tl-event.left  .tl-node::after,
+  .tl-event.right .tl-node::after { display: none; }
+
+  .tl-year-label { font-size: 2.2rem; }
+}
